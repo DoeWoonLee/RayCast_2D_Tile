@@ -27,6 +27,7 @@ namespace Bresenham_2D_RayCast
 
             this.MouseMove += OnMouseMove;
             this.MouseClick += OnMouseClick;
+            this.KeyDown += OnKeyDown;
         }
         protected override void OnPaint(PaintEventArgs e)
         {
@@ -40,6 +41,24 @@ namespace Bresenham_2D_RayCast
         {
             m_Draw.Mouse = new Point(e.X,e.Y);
             m_Draw.MakeBresenhamList();
+            Invalidate(true);
+        }
+        private void OnKeyDown(object sender, KeyEventArgs e)
+        {
+            int moveX = 0;
+            int moveY = 0;
+            if (e.KeyCode == Keys.Left)
+                moveX = -5;
+            if (e.KeyCode == Keys.Right)
+                moveX = 5;
+
+            if (e.KeyCode == Keys.Up)
+                moveY = -5;
+            if (e.KeyCode == Keys.Down)
+                moveY = 5;
+
+            m_Draw.MoveCurveStart(new Point(moveX, moveY));
+            m_Draw.MakeCurve();
             Invalidate(true);
         }
     }

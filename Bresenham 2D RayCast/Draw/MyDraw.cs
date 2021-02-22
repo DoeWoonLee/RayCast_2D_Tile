@@ -194,6 +194,74 @@ namespace Bresenham_2D_RayCast
 
             return 0;
         }
+        public void MakeCurveMark2()
+        {
+            m_BresenhamList.Clear();
+            int index = 0;
+
+            int tileX = m_CurveStart.X / m_TileCX;
+            int tileY = m_CurveStart.Y / m_TileCX;
+
+            float intervalX = direction > 0 ? m_CurveStart.X - tileX * m_TileCX : (tileX + 1) * m_TileCX - m_CurveStart.X;
+            float intervalY = m_CurveStart.Y - tileY * m_TileCX;
+
+            // 첫번째 타일의 절편
+            float x = 0f;
+            float y = 0f;
+
+            float dtx = m_TileCX - intervalX;
+            float dty = -intervalY;
+            float rangeY = -intervalY;
+            float rangeX = -intervalX;
+
+            int tileXDelta = 0;
+            while (index < 20)
+            {
+                m_BresenhamList.Add(new BresenhamData(index++, tileX + tileXDelta * (int)direction, tileY));
+                // 오른쪽
+                y = PhysicsCurveFomulaY(dtx, jump, speed, gravity);
+                if(rangeY <= y && y <= rangeY + m_TileCY)
+                {
+                    rangeX += m_TileCX;
+                    dtx += m_TileCX;
+                    tileXDelta++;
+                    continue;
+                }
+                // 위
+                float rootTemp = jump * jump - 2f * gravity * (dty);
+                float t = 0f;
+                if(rootTemp > 0f)
+                {
+                    rootTemp = (float)Math.Sqrt((double)rootTemp);
+                     t = (jump + rootTemp) / gravity;
+                    x = t * speed;
+                    if (rangeX <= x && x <= rangeX + m_TileCX)
+                    {
+                        rangeY -= m_TileCY;
+                        dty -= m_TileCY;
+                        tileY--;
+                        continue;
+                    }
+                }
+               
+                // 아래
+                rootTemp = jump * jump - 2f * gravity * (dty + m_TileCY);
+                if(rootTemp > 0f)
+                {
+                    rootTemp = (float)Math.Sqrt((double)rootTemp);
+                    t = (jump - rootTemp) / gravity;
+                    x = t * speed;
+                    if (rangeX <= x && x <= rangeX + m_TileCX)
+                    {
+                        rangeY += m_TileCY;
+                        dty += m_TileCY;
+                        tileY++;
+                        continue;
+                    }
+                }
+                
+            }
+        }
         public void MakeCurve()
         {
             m_BresenhamList.Clear();

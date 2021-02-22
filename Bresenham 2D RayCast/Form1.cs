@@ -86,7 +86,7 @@ namespace Bresenham_2D_RayCast
                 m_Draw.FlipDirection();
             }
             m_Draw.MoveCurveStart(new Point(moveX, moveY));
-            m_Draw.MakeCurve();
+            m_Draw.MakeCurveMark2();
             Invalidate(true);
         }
     }

@@ -49,14 +49,42 @@ namespace Bresenham_2D_RayCast
             int moveY = 0;
             if (e.KeyCode == Keys.Left)
                 moveX = -5;
-            if (e.KeyCode == Keys.Right)
+            else if (e.KeyCode == Keys.Right)
                 moveX = 5;
 
             if (e.KeyCode == Keys.Up)
                 moveY = -5;
-            if (e.KeyCode == Keys.Down)
+            else if (e.KeyCode == Keys.Down)
                 moveY = 5;
 
+            if(e.KeyCode == Keys.A)
+            {
+                m_Draw.AddJump(-1);
+            }
+            else if(e.KeyCode == Keys.S)
+            {
+                m_Draw.AddJump(1);
+            }
+            if (e.KeyCode == Keys.Q)
+            {
+                m_Draw.AddSpeed(-1);
+            }
+            else if (e.KeyCode == Keys.W)
+            {
+                m_Draw.AddSpeed(1);
+            }
+            if (e.KeyCode == Keys.Z)
+            {
+                m_Draw.AddGravity(-1);
+            }
+            else if (e.KeyCode == Keys.X)
+            {
+                m_Draw.AddGravity(1);
+            }
+            if (e.KeyCode == Keys.F)
+            {
+                m_Draw.FlipDirection();
+            }
             m_Draw.MoveCurveStart(new Point(moveX, moveY));
             m_Draw.MakeCurve();
             Invalidate(true);

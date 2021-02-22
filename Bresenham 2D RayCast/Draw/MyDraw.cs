@@ -38,7 +38,8 @@ namespace Bresenham_2D_RayCast
 
         private float speed = 4f;
         private float gravity = -1f;
-        private float jump = 0;
+        private float jump = 2;
+        private float direction = 1;
         List<BresenhamData> m_BresenhamList = null;
         public MyDraw()
         {
@@ -83,11 +84,14 @@ namespace Bresenham_2D_RayCast
             float beforeX = 0f;
             float beforeY = 0f;
 
-            for (int x = 0; x < 200; ++x)
+            for (int x = 0; x < 300; ++x)
             {
                 float y = PhysicsCurveFomulaY(x, jump, speed, gravity);
 
-                g.DrawLine(pen, beforeX + m_CurveStart.X, beforeY + m_CurveStart.Y, m_CurveStart.X + x, y + m_CurveStart.Y);
+                g.DrawLine(pen, beforeX * direction + m_CurveStart.X,
+                    beforeY + m_CurveStart.Y,
+                    m_CurveStart.X  + x * direction,
+                    y + m_CurveStart.Y);
 
                 beforeX = x;
                 beforeY = y;
@@ -114,6 +118,7 @@ namespace Bresenham_2D_RayCast
         }
         private bool PhysicsCurveFomulaX(float y, float jump, float speed, float gravity, ref float x1, ref float x2)
         {
+            //y 는 로컬 y
             // t == (s + sqrt(s*s  - 2gy)) / g
             float rootTemp = jump * jump - 2f * gravity * y;
             //if (rootTemp < 0f)
@@ -121,11 +126,11 @@ namespace Bresenham_2D_RayCast
             rootTemp = (float)Math.Sqrt((double)rootTemp);
 
             // val = t
-            float val1 = (jump + rootTemp) / gravity;
-            float val2 = (jump - rootTemp) / gravity;
+            float t1 = (jump + rootTemp) / gravity;
+            float t2 = (jump - rootTemp) / gravity;
 
-           x1 = val1 * speed ;
-           x2 = val2 * speed ;
+           x1 = t1 * speed ;
+           x2 = t2 * speed ;
 
             return true;
 
@@ -142,6 +147,7 @@ namespace Bresenham_2D_RayCast
             //    }
             //}
 
+            //float time = speed / m_TileCX;
             // 우
             if (1 != beforeCollision)
             {
@@ -153,20 +159,21 @@ namespace Bresenham_2D_RayCast
             }
             float x0 = 0f, x1 = 0f;
             // 위
-            //if (4 != beforeCollision)
-            //{
-            //    if (PhysicsCurveFomulaX(rect.Y, jump, speed, gravity, ref x0, ref x1))
-            //    {
-            //        x0 += m_CurveStart.X;
-            //        x1 += m_CurveStart.X;
+            if (4 != beforeCollision)
+            {
+                if (PhysicsCurveFomulaX(rect.Y - m_TileCY + rect.Height, jump, speed, gravity, ref x0, ref x1))
+                {
+                    x0 += m_CurveStart.X;
+                    x1 += m_CurveStart.X;
 
-            //        if ((tileX * m_TileCX <= x0 && x0 <= (tileX + 1) * m_TileCX) ||
-            //       (tileX * m_TileCX <= x1 && x1 <= (tileX + 1) * m_TileCX))
-            //        {
-            //            return 3;
-            //        }
-            //    }
-            //}
+                    if ((tileX * m_TileCX <= x0 && x0 <= (tileX + 1) * m_TileCX))
+                   //     ||
+                   //(tileX * m_TileCX <= x1 && x1 <= (tileX + 1) * m_TileCX))
+                    {
+                        return 3;
+                    }
+                }
+            }
 
             if (3 != beforeCollision)
             {
@@ -177,7 +184,7 @@ namespace Bresenham_2D_RayCast
                 x0 += m_CurveStart.X;
                 x1 += m_CurveStart.X;
 
-                if ((tileX * m_TileCX <= x0 && x0 <= (tileX + 1) * m_TileCX) ||
+                if (/*(tileX * m_TileCX <= x0 && x0 <= (tileX + 1) * m_TileCX) ||*/
                     (tileX * m_TileCX <= x1 && x1 <= (tileX + 1) * m_TileCX))
                 {
                     return 4;
@@ -201,6 +208,11 @@ namespace Bresenham_2D_RayCast
             int intervalX = m_CurveStart.X - tileX * m_TileCX;
             int intervalY = m_CurveStart.Y - tileY * m_TileCY;
 
+            if(direction < 0)
+            {
+                intervalX = m_TileCX - intervalX;
+                //intervalX = m_TileCY - intervalX;
+            }
 
             Rectangle rect = new Rectangle();
             rect.X = startX * m_TileCX;
@@ -211,22 +223,24 @@ namespace Bresenham_2D_RayCast
             int index = 0;
 
             int collision = 0;
+
+            int deltaX = 0;
             while (index < 20)
             {
-                collision = CollisionWithRectangle(ref rect, tileX, tileY, ref collision);
+                collision = CollisionWithRectangle(ref rect, tileX + deltaX, tileY, ref collision);
                 if(0 != collision)
                 {
-                    m_BresenhamList.Add(new BresenhamData(index, tileX, tileY));
+                    m_BresenhamList.Add(new BresenhamData(index, tileX + deltaX * (int)direction, tileY));
                 }
                 switch (collision)
                 {
                     case 1: // 좌
                         startX--;
-                        tileX--;
+                        deltaX--;
                         break;
                     case 2: // 우
                         startX++;
-                        tileX++;
+                        deltaX++;
                         break;
                     case 3: // 위
                         startY--;
@@ -325,7 +339,22 @@ namespace Bresenham_2D_RayCast
                 m_Mouse = value;
             }
         }
-
+        public void AddJump(int addedJump)
+        {
+            jump += addedJump;
+        }
+        public void AddSpeed(int addedSpeed)
+        {
+            speed += addedSpeed;
+        }
+        public void AddGravity(int addedGravity)
+        {
+            gravity += addedGravity;
+        }
+        public void FlipDirection()
+        {
+            direction *= -1;
+        }
         public void MoveCurveStart(Point move)
         {
             m_CurveStart.X += move.X;

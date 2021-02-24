@@ -10,7 +10,7 @@ namespace Bresenham_2D_RayCast
 {
     public struct BresenhamData
     {
-        public BresenhamData(int _index, int _x, int _y)
+        public BresenhamData(int _index, int _x, int _y, float normalX, float normalY)
         {
             index = _index;
             x = _x;
@@ -19,6 +19,8 @@ namespace Bresenham_2D_RayCast
         public int index;
         public int x;
         public int y;
+        public float normalX;
+        public float normalY;
     }
 
     public class MyDraw
@@ -36,9 +38,9 @@ namespace Bresenham_2D_RayCast
         private Point m_Mouse;
         private Point m_CurveStart;
 
-        private float speed = 4f;
-        private float gravity = -1f;
-        private float jump = 2;
+        private float speed = 150f;
+        private float gravity = -20f;
+        private float jump = -100f;
         private float direction = 1;
         List<BresenhamData> m_BresenhamList = null;
         public MyDraw()
@@ -114,7 +116,7 @@ namespace Bresenham_2D_RayCast
         private float PhysicsCurveFomulaY(float x, float jump, float speed, float gravity)
         {
             float t = (x  / speed);
-            return (-t * t / 2 * gravity + t * jump);
+            return (-t * t * gravity) / 2 + t * jump;
         }
         private bool PhysicsCurveFomulaX(float y, float jump, float speed, float gravity, ref float x1, ref float x2)
         {
@@ -215,9 +217,12 @@ namespace Bresenham_2D_RayCast
             float rangeX = -intervalX;
 
             int tileXDelta = 0;
+
+            float normalX = 0f;
+            float normalY = 0f;
             while (index < 20)
             {
-                m_BresenhamList.Add(new BresenhamData(index++, tileX + tileXDelta * (int)direction, tileY));
+                m_BresenhamList.Add(new BresenhamData(index++, tileX + tileXDelta * (int)direction, tileY,normalX, normalY));
                 // 오른쪽
                 y = PhysicsCurveFomulaY(dtx, jump, speed, gravity);
                 if(rangeY <= y && y <= rangeY + m_TileCY)
@@ -259,7 +264,7 @@ namespace Bresenham_2D_RayCast
                         continue;
                     }
                 }
-                
+                break;
             }
         }
         public void MakeCurve()
@@ -298,7 +303,7 @@ namespace Bresenham_2D_RayCast
                 collision = CollisionWithRectangle(ref rect, tileX + deltaX, tileY, ref collision);
                 if(0 != collision)
                 {
-                    m_BresenhamList.Add(new BresenhamData(index, tileX + deltaX * (int)direction, tileY));
+                    m_BresenhamList.Add(new BresenhamData(index, tileX + deltaX * (int)direction, tileY, 0f, 0f));
                 }
                 switch (collision)
                 {
@@ -367,7 +372,7 @@ namespace Bresenham_2D_RayCast
 
             while (Math.Abs(t) < length)
             {
-                m_BresenhamList.Add(new BresenhamData(index++, tileX, tileY));
+                m_BresenhamList.Add(new BresenhamData(index++, tileX, tileY, 0f, 0f));
 
                 if (dtX < dtY )
                 {

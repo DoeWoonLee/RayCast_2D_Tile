@@ -10,20 +10,29 @@ namespace Bresenham_2D_RayCast
 {
     public struct BresenhamData
     {
-        public BresenhamData(int _index, int _x, int _y)
+        public BresenhamData(int _index, int _x, int _y, float _normalX, float _normalY, float _posX, float _posY)
         {
             index = _index;
             x = _x;
             y = _y;
+            normalX = _normalX;
+            normalY = _normalY;
+            posX = _posX;
+            posY = _posY;
         }
         public int index;
         public int x;
         public int y;
+        public float normalX;
+        public float normalY;
+        public float posX;
+        public float posY;
     }
 
     public class MyDraw
     {
         private Pen pen = new Pen(Color.Black);
+        private Pen redpen = new Pen(Color.Red);
         private Brush brush = new SolidBrush(Color.Green);
 
         private int m_TileCX = 32;
@@ -64,6 +73,10 @@ namespace Bresenham_2D_RayCast
                     float centerY = (float)(bresh.y * m_TileCY);
 
                     g.FillRectangle(brush, centerX + 1, centerY + 1, m_TileCX - 1, m_TileCY - 1);
+
+                    g.DrawEllipse(pen, bresh.posX - 3, bresh.posY - 3, 6, 6);
+
+                    g.DrawLine(redpen, bresh.posX, bresh.posY, bresh.posX + bresh.normalX * 10, bresh.posY + bresh.normalY * 10);
                 }
 
                 g.DrawLine(pen, m_StartPt, m_Mouse);
@@ -117,9 +130,18 @@ namespace Bresenham_2D_RayCast
 
             float ddtX = dirSignX * m_TileCX / dirX;
             float ddtY = dirSignY * m_TileCX / dirY;
+
+            float normalX = 0f;
+            float normalY = 0f;
+
+            float posX = 0f;
+            float posY = 0f;
             while (Math.Abs(t) < length)
             {
-                m_BresenhamList.Add(new BresenhamData(index++, tileX, tileY));
+                posX = t * dirX + x0;
+                posY = t * dirY + y0;
+
+                m_BresenhamList.Add(new BresenhamData(index++, tileX, tileY, normalX, normalY, posX, posY));
 
                 float dt = 0f;
                 if (dtX < dtY )
@@ -129,6 +151,9 @@ namespace Bresenham_2D_RayCast
                     t += dt;
                     dtX = dtX + ddtX - dt;
                     dtY = dtY - dt;
+
+                    normalX = -dirSignX;
+                    normalY = 0f;
                 }
                 else
                 {
@@ -138,6 +163,8 @@ namespace Bresenham_2D_RayCast
                     dtX = dtX - dt;
                     dtY = dtY + ddtY - dt;
 
+                    normalX = 0f;
+                    normalY = -dirSignY;
                 }
             }
            
@@ -174,8 +201,8 @@ namespace Bresenham_2D_RayCast
             if (y0 < y1) ystep = 1; else ystep = -1;
             for (int x = x0; x <= x1; x += 1)
             {
-                if (steep) m_BresenhamList.Add(new BresenhamData(index, y, x));
-                else m_BresenhamList.Add(new BresenhamData(index, x, y));
+                if (steep) m_BresenhamList.Add(new BresenhamData(index, y, x, 0f, 0f, 0f, 0f));
+                else m_BresenhamList.Add(new BresenhamData(index, x, y, 0f, 0f, 0f, 0f));
                 error += deltay;
                 if (2 * error >= deltax)
                 {

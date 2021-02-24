@@ -40,7 +40,7 @@ namespace Bresenham_2D_RayCast
         private void OnMouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
         {
             m_Draw.Mouse = new Point(e.X,e.Y);
-            m_Draw.MakeBresenhamList();
+           // m_Draw.MakeBresenhamList();
             Invalidate(true);
         }
         private void OnKeyDown(object sender, KeyEventArgs e)
